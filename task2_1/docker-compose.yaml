@@ -1,0 +1,74 @@
+version: '3'
+services:
+
+    NginX1:
+        image: nginx
+        ports:
+          - 127.0.0.1:8080:80
+        networks:
+          - webnet
+        volumes:
+          - ./serv1:/usr/share/nginx/html
+        restart: always
+        privileged: true
+
+
+    NginX2:
+        image: nginx
+        ports:
+         - 127.0.0.2:8080:80
+        networks:
+         - webnet
+        volumes:
+         - ./serv2/:/usr/share/nginx/html
+        restart: always
+        privileged: true
+
+
+    HapKeep1:
+        image: goldenroute/keepalived-haproxy:latest
+        ports:
+          - 127.0.0.6:8080:80
+        networks:
+          - webnet
+        volumes:
+            - ./balance1/haproxy:/usr/local/etc/haproxy:ro
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /root/.docker:/root/.docker
+        environment:
+            INTERFACE: "eth0"
+            STATE: "MASTER"
+            VIRTUAL_ROUTER_ID: "1"
+            PRIORITY: "101"
+            VIRTUAL_IP: "127.0.0.5"
+            VIRTUAL_MASK: "24"
+        command: [-f, /usr/local/etc/haproxy/haproxy.cfg]
+        tty: true
+        privileged: true
+
+
+    HapKeep2:
+        image: goldenroute/keepalived-haproxy:latest
+        ports:
+         - 127.0.0.5:8080:80
+        networks:
+         - webnet
+        volumes:
+            - ./balance2/haproxy:/usr/local/etc/haproxy:ro
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /root/.docker:/root/.docker
+        environment:
+            INTERFACE: "eth0"
+            STATE: "BACKUP"
+            VIRTUAL_ROUTER_ID: "1"
+            PRIORITY: "100"
+            VIRTUAL_IP: "127.0.0.6"
+            VIRTUAL_MASK: "24"
+        command: [-f, /usr/local/etc/haproxy/haproxy.cfg]
+        tty: true
+        privileged: true
+
+
+networks:
+       webnet:
+         name: webnet

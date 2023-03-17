@@ -1,0 +1,139 @@
+---
+- name: NGINX
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: NGINX install
+      apt:
+        name: nginx
+        state: latest
+      notify:
+        - restart nginx
+      tags:
+        - nginx-package
+        - packages
+
+    - name: NGINX config
+      template:
+        src: nginx.conf.j2
+        dest: /tmp/nginx.conf
+      notify:
+        - reload nginx
+      tags:
+      - nginx-configuration
+
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+        enabled: yes
+
+    - name: reload nginx
+      systemd:
+        name: nginx
+        state: reloaded
+
+
+- name: NGINX
+  hosts: nginx1
+  become: yes
+  tasks:
+    - name: NGINX html
+      template:
+        src: index1.html
+        dest: /var/www/html/index.nginx-debian.html
+        owner: root
+        group: root
+        mode: 0644
+
+
+- name: NGINX
+  hosts: nginx2
+  become: yes
+  tasks:
+    - name: NGINX html
+      template:
+        src: index2.html
+        dest: /var/www/html/index.nginx-debian.html
+        owner: root
+        group: root
+        mode: 0644
+
+- name: HapKepp
+  hosts: loadbalancers
+  become: yes
+
+  tasks:
+    - name: HAProxy install
+      apt:
+        name: haproxy
+        state: present
+
+    - name: Keepalived install
+      apt:
+        name: keepalived
+      tags:
+        - haproxy-package
+        - keepalived-package
+        - packages
+
+    - name: HAProxy config
+      template:
+        src: haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+        owner: root
+        group: root
+        mode: 0644
+      notify:
+      - restart haproxy
+
+  handlers:
+    - name: restart haproxy
+      systemd:
+        name: haproxy
+        state: restarted
+        enabled: yes
+
+- name: HapKeep
+  hosts: HapKeep1
+  become: yes
+
+  tasks:
+    - name: Keepalived config
+      template:
+        src: keepalived1.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+        owner: root
+        group: root
+        mode: 0644
+
+
+
+  handlers:
+    - name: start keepalived
+      systemd:
+        state: started
+        name: keepalived
+        enabled: yes
+
+- name: HapKeep2
+  hosts: HapKeep2
+  become: yes
+
+  tasks:
+    - name: Keepalived config
+      template:
+        src: keepalived2.conf.j2
+        dest: /etc/keepalived/keepalived.conf
+        owner: root
+        group: root
+        mode: 0644
+
+  handlers:
+    - name: start keepalived
+      systemd:
+        state: started
+        name: keepalived
+        enabled: yes

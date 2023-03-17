@@ -1,0 +1,16 @@
+<html>
+<body>
+<h1>Хранилище ключ значение</h1>
+<p>Прототип API  хранилища ключ-значение</p>
+<p>Получить все данные хранилища WEB</p>
+<p>http://127.0.0.1:5000/api/v1/storage/json/all</p>
+<p>Получить все данные хранилища CURL</p>
+<p>curl -i -X GET http://{127.0.0.1:5000}/api/v1/storage/json/all</p>
+<p>Получить данные хранилища WEB</p>
+<p>http://{127.0.0.1:5000}/api/v1/storage/json?key=test</p>
+<p>Получить данные хранилища CURL</p>
+<p>curl -i -GET http://{127.0.0.1:5000}/api/v1/storage/json/read?key=test </p>
+<p>Добавить данные в хранилище хранилища WEB</p>
+<p>curl -i -H "Content-Type: application/json" -X POST -d '{"test3": "value4"}' http://{127.0.0.1:5000}/api/v1/storage/json/writе</p>
+</body>
+</html>

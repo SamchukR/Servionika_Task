@@ -1,0 +1,11 @@
+FROM python:3.10-alpine3.17
+
+COPY . /task
+
+WORKDIR /task
+
+RUN pip install -r requirements.txt
+
+ENTRYPOINT [ "python" ]
+
+CMD ["./storage1.py"]

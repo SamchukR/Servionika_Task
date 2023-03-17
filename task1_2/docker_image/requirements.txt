@@ -1,0 +1,15 @@
+click
+dataclasses
+distlib
+filelock
+Flask
+importlib-metadata
+importlib-resources
+itsdangerous
+Jinja2
+MarkupSafe
+platformdirs
+typing-extensions
+virtualenv
+Werkzeug
+zipp

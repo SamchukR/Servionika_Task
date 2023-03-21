@@ -79,13 +79,20 @@
         - keepalived-package
         - packages
 
-    - name: HAProxy config
+    - name: create  HAProxy config
       template:
         src: haproxy.cfg.j2
         dest: /etc/haproxy/haproxy.cfg
         owner: root
         group: root
         mode: 0644
+
+
+    - name: set webservers ip for haproxy
+      lineinfile: dest=/etc/haproxy/haproxy.cfg
+                  regexp='server'
+                  line='server webserver1 {{hostvars['nginx1']['ansible_host']}}:80 check\nserver webserver2 {{hostvars['nginx2']['ansible_host']}}:80 check'
+                  state=present
       notify:
       - restart haproxy
 
@@ -108,7 +115,6 @@
         owner: root
         group: root
         mode: 0644
-
 
 
   handlers:
@@ -137,3 +143,22 @@
         state: started
         name: keepalived
         enabled: yes
+
+- name: Set Keepalived virtual ip
+  hosts: loadbalancers
+  become: yes
+
+  tasks:
+    - name: set keepalived ip
+      lineinfile:
+       dest=/etc/keepalived/keepalived.conf
+       regexp='0.0.0.0'
+       line="{{virtual_ip}} "
+       state=present
+
+    - name: Keepalived restart
+      service:
+       name: keepalived
+       state: restarted
+      retries: 3
+      delay: 3
